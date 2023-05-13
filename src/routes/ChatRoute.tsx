@@ -45,8 +45,8 @@ export function ChatRoute() {
               Authorization: `Bearer ${authToken}`,
             },
           });
-          //console.log(response.data)
-          setMessages(response.data);
+          //console.log(response.data.messages)
+          setMessages(response.data.messages);
         } catch (error) {
           console.error(error);
         }
@@ -58,16 +58,16 @@ export function ChatRoute() {
     return messages;
   };
 
-
   const messages = useLiveQueryVar(chatId, auth);
 
   console.log(messages)
   
-  const userMessages =
-    messages
-      ?.filter((message) => message.role === "user")
+  const userMessages = messages
+      ?.filter((messages) => messages.role === "user")
       .map((message) => message.content) || [];
 
+  console.log(userMessages) 
+  console.log("we are finally here")
   const [userMsgIndex, setUserMsgIndex] = useState(0);
   const [content, setContent] = useState("");
   const [contentDraft, setContentDraft] = useState("");
@@ -279,7 +279,9 @@ export function ChatRoute() {
     setUserMsgIndex(0);
   };
 
-  if (!chatId) return null;
+  console.log("are we here?")
+  console.log(chatId)
+  //if (!chatId) return null;
 
   return (
     <>

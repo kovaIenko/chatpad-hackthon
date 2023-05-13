@@ -35,7 +35,7 @@ export function Login({ handleAuth }: AuthPropType) {
   const [userDataGoogle, setUserDataGoogle] = useState<null | UserdataGoogle>(null)
 
 	const loginWith = useRef(localStorage.getItem("loginWith"))
-  console.log(loginWith)
+  //console.log(loginWith)
 
 	useEffect(() => {
 		const accessToken = localStorage.getItem("accessToken")

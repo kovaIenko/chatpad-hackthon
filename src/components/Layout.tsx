@@ -29,7 +29,6 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useLiveQuery } from "dexie-react-hooks";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { Chat, db } from "../db";
@@ -57,6 +56,7 @@ export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  console.log(location)
   const [search, setSearch] = useState("");
   const chatId = useChatId();
   // const chat = useLiveQuery(async () => {
@@ -69,6 +69,7 @@ export function Layout() {
   const useLiveQueryVar = (chatId: any, authToken: any) => {
     const [chat, setChat] = useState<Chat>();
     useEffect(() => {
+      console.log("here we are trying to load chat")
       const fetchData = async () => {
         if (!chatId || !authToken) return [];
         try {
@@ -92,7 +93,7 @@ export function Layout() {
 
   const chat = useLiveQueryVar(chatId, auth);
 
-  console.log(chat)
+  //console.log(chat)
   const border = `${rem(1)} solid ${
     theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[2]
   }`;

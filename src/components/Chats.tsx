@@ -1,7 +1,5 @@
 import { ActionIcon, Flex, Menu } from "@mantine/core";
 import { IconDotsVertical, IconMessages } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-location";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 import { Chat, db } from "../db";
 import { useChatId } from "../hooks/useChatId";
@@ -10,6 +8,7 @@ import { EditChatModal } from "./EditChatModal";
 import { MainLink } from "./MainLink";
 import axios from "axios"; 
 import { useEffect, useState } from "react";
+import { Link } from 'react-router-dom';
 
 export function Chats({ search }: { search: string }) {
   const chatId = useChatId();
