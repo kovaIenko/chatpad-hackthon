@@ -3,7 +3,7 @@ import "dexie-export-import";
 import { config } from "../utils/config";
 
 export interface Chat {
-  id: string;
+  chatId: string;
   description: string;
   totalTokens: number;
   createdAt: Date;

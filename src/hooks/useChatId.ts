@@ -1,7 +1,8 @@
-import { useMatchRoute } from "@tanstack/react-location";
+import { useLocation } from "react-router-dom";
 
 export function useChatId() {
-  const matchRoute = useMatchRoute();
-  const match = matchRoute({ to: "/chats/:chatId" });
-  return match?.chatId;
+  const location = useLocation();
+  //console.log(location.pathname)
+  const match = location.pathname.match(/\/chats\/(\d+)/);
+  return match?.[1];
 }

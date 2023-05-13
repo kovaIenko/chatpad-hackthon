@@ -28,11 +28,10 @@ import {
   IconSunHigh,
   IconX,
 } from "@tabler/icons-react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useParams, useNavigate } from "react-router-dom";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
-import { Chat, db } from "../db";
-import { useChatId } from "../hooks/useChatId";
+import { Chat } from "../db";
 import { Chats } from "./Chats";
 import { CreatePromptModal } from "./CreatePromptModal";
 import { DatabaseModal } from "./DatabaseModal";
@@ -56,20 +55,14 @@ export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(location)
   const [search, setSearch] = useState("");
-  const chatId = useChatId();
-  // const chat = useLiveQuery(async () => {
-  //   if (!chatId) return null;
-  //   return db.chats.get(chatId);
-  // }, [chatId]);
-
+  const { chatId } = useParams();
 
   var auth = localStorage.getItem("accessToken");
   const useLiveQueryVar = (chatId: any, authToken: any) => {
     const [chat, setChat] = useState<Chat>();
     useEffect(() => {
-      console.log("here we are trying to load chat")
+      //console.log("here we are trying to load chat")
       const fetchData = async () => {
         if (!chatId || !authToken) return [];
         try {
@@ -159,7 +152,7 @@ export function Layout() {
               onChange={(value) => setTab(value as typeof tab)}
               data={["Chats"]}
             />
-            <Box sx={{ padding: 4 }}>
+            {/* <Box sx={{ padding: 4 }}>
               {tab === "Chats" && (
                 <Button
                   fullWidth
@@ -188,7 +181,7 @@ export function Layout() {
                 </Button>
               )}
               {tab === "Prompts" && <CreatePromptModal />}
-            </Box>
+            </Box> */}
           </Navbar.Section>
           <Navbar.Section
             sx={(theme) => ({

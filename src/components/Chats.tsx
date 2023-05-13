@@ -8,10 +8,11 @@ import { EditChatModal } from "./EditChatModal";
 import { MainLink } from "./MainLink";
 import axios from "axios"; 
 import { useEffect, useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 
 export function Chats({ search }: { search: string }) {
-  const chatId = useChatId();
+  const { chatId } = useParams();
+
   // const chats = useLiveQuery(() =>
   //   db.chats.orderBy("createdAt").reverse().toArray()
   // );
@@ -19,11 +20,13 @@ export function Chats({ search }: { search: string }) {
   var auth = localStorage.getItem("accessToken");
   var email = localStorage.getItem("email");
 
+  var location = useLocation();
+
   const useLiveQueryVar = (chatId: any, authToken: any) => {
     const [chats, setChats] = useState<Chat[]>([]);
     useEffect(() => {
       const fetchData = async () => {
-        console.log("try to get chats")
+        //console.log("try to get chats")
         if (!authToken) {
           return [];
         }
@@ -33,8 +36,6 @@ export function Chats({ search }: { search: string }) {
               Authorization: `Bearer ${authToken}`,
             },
           });
-          //console.log(response)
-          //console.log(response.data)
           setChats(response.data.chats);
         } catch (error) {
           console.error(error);
@@ -42,7 +43,7 @@ export function Chats({ search }: { search: string }) {
       };
   
       fetchData();
-    }, [chatId, authToken]);
+    }, [location, chatId]);
   
     return chats;
   };

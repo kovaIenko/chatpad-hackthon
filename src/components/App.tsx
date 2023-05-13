@@ -83,7 +83,7 @@ export function App() {
         toggleColorScheme={toggleColorScheme}
       >
         <Routes>
-          <Route path="/login" element={!auth? <Login handleAuth={handleAuth}  /> : <Navigate to="/" />}> </Route>
+          <Route path="/login" element={!auth? <Login handleAuth={handleAuth} /> : <Navigate to="/" />}> </Route>
           <Route path="/" element={ !auth? <Navigate to="/login" /> : <IndexRoute/> }> </Route>
           <Route path="/chats/:chatId" element={!auth? <Navigate to="/login" /> : <ChatRoute />}> </Route>
         </Routes>

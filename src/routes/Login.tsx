@@ -7,13 +7,6 @@ import { Card, Spacer, Button, Text, Container } from "@nextui-org/react"
 import { IconGoogle } from "../assets/icons"
 import { useNavigate } from "react-router-dom";
 
-import { KeyboardEvent, useEffect, useRef,  useState, type ChangeEvent } from "react";
-
-import { getUserDataGoogle } from "./googleAuth";
-
-interface UserdataGoogle {
-	email: string
-}
 
 export type AuthPropType = {
   handleAuth: (value: any) => void;
@@ -31,25 +24,6 @@ export function Login({ handleAuth }: AuthPropType) {
 			navigate("/")
 		},
 	})
-
-  const [userDataGoogle, setUserDataGoogle] = useState<null | UserdataGoogle>(null)
-
-	const loginWith = useRef(localStorage.getItem("loginWith"))
-  //console.log(loginWith)
-
-	useEffect(() => {
-		const accessToken = localStorage.getItem("accessToken")
-
-    //console.log("try to log")
-		if (accessToken && loginWith.current === "Google") {
-			getUserDataGoogle(accessToken).then(resp => {
-				setUserDataGoogle(resp)
-        localStorage.setItem("email", resp.email);
-			})
-
-		}
-	}, [loginWith])
-
 
   return (
     <>

@@ -20,11 +20,34 @@ import { Logo } from "../components/Logo";
 import { SettingsModal } from "../components/SettingsModal";
 import { db } from "../db";
 //import { config } from "../utils/config";
-import { useEffect, useState } from "react";
+
+import {useEffect, useRef,  useState, type ChangeEvent } from "react";
+
+import { getUserDataGoogle } from "./googleAuth";
+
+interface UserdataGoogle {
+	email: string
+}
 
 export function IndexRoute() {
-  const settings = useLiveQuery(() => db.settings.get("general"));
-  const { openAiApiKey } = settings ?? {};
+
+  const [userDataGoogle, setUserDataGoogle] = useState<null | UserdataGoogle>(null)
+
+	const loginWith = useRef(localStorage.getItem("loginWith"))
+  //console.log(loginWith)
+
+	useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken")
+
+    //console.log("try to log")
+		if (accessToken && loginWith.current === "Google") {
+			getUserDataGoogle(accessToken).then(resp => {
+				setUserDataGoogle(resp)
+        localStorage.setItem("email", resp.email);
+			})
+		}
+	}, [])
+
   return (
     <>
       <Center py="xl" sx={{ height: "100%" }}>

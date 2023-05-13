@@ -26,13 +26,17 @@ import { config } from "../utils/config";
 
 import axios from "axios"; 
 
+import { useParams } from 'react-router-dom';
+
+
 export function ChatRoute() {
 
-  console.log("we are here:")
-  const chatId = useChatId();
-
+  //console.log("we are here:")
+  
+  const { chatId } = useParams();
   const auth = localStorage.getItem("accessToken");
 
+  console.log("we opened chat and its id " + chatId)
   const useLiveQueryVar = (chatId: any, authToken: any) => {
     const [messages, setMessages] = useState<Message[]>([]);
     console.log("try to get messages by chatId")
@@ -127,7 +131,6 @@ export function ChatRoute() {
          role: "user",
           createdAt: new Date(),
       }
-
 
      console.log(user_message)
       await axios.post(`http://localhost:3001/api/messages/save`, 
@@ -279,16 +282,14 @@ export function ChatRoute() {
     setUserMsgIndex(0);
   };
 
-  console.log("are we here?")
-  console.log(chatId)
-  //if (!chatId) return null;
+  if (!chatId) return null;
 
   return (
     <>
       <Container pt="xl" pb={100}>
         <Stack spacing="xs">
           {messages?.map((message) => (
-            <MessageItem key={message.id} message={message} />
+            <MessageItem key={message.messageId} message={message} />
           ))}
         </Stack>
         {submitting && (
