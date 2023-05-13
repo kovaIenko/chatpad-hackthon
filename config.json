@@ -1,0 +1,22 @@
+{
+    "defaultModel": {
+    "value": "",
+    "label": ""
+    },
+    "defaultType": "openai",
+    "defaultAuth": "none",
+    "defaultBase": "string",
+    "defaultVersion": "string",
+    "defaultKey": "string",
+    "availableModels": [],
+    "writingCharacters": [],
+    "writingTones": [""],
+    "writingStyles": [""],
+    "writingFormats": [],
+    "showDownloadLink": true,
+    "allowDarkModeToggle": true,
+    "allowSettingsModal": true,
+    "allowDatabaseModal": true,
+    "showTwitterLink": "true",
+    "showFeedbackLink": "true"
+}

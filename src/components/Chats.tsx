@@ -3,17 +3,54 @@ import { IconDotsVertical, IconMessages } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-location";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
-import { db } from "../db";
+import { Chat, db } from "../db";
 import { useChatId } from "../hooks/useChatId";
 import { DeleteChatModal } from "./DeleteChatModal";
 import { EditChatModal } from "./EditChatModal";
 import { MainLink } from "./MainLink";
+import axios from "axios"; 
+import { useEffect, useState } from "react";
 
 export function Chats({ search }: { search: string }) {
   const chatId = useChatId();
-  const chats = useLiveQuery(() =>
-    db.chats.orderBy("createdAt").reverse().toArray()
-  );
+  // const chats = useLiveQuery(() =>
+  //   db.chats.orderBy("createdAt").reverse().toArray()
+  // );
+
+  var auth = localStorage.getItem("accessToken");
+  var email = localStorage.getItem("email");
+
+  const useLiveQueryVar = (chatId: any, authToken: any) => {
+    const [chats, setChats] = useState<Chat[]>([]);
+    useEffect(() => {
+      const fetchData = async () => {
+        console.log("try to get chats")
+        if (!authToken) {
+          return [];
+        }
+        try {
+          const response = await axios.get(`http://localhost:3001/api/chats/getall`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+          //console.log(response)
+          //console.log(response.data)
+          setChats(response.data.chats);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+  
+      fetchData();
+    }, [chatId, authToken]);
+  
+    return chats;
+  };
+
+  const chats = useLiveQueryVar(chatId, auth);
+ 
+  //console.log(chats)
   const filteredChats = useMemo(
     () =>
       (chats ?? []).filter((chat) => {
@@ -27,8 +64,8 @@ export function Chats({ search }: { search: string }) {
     <>
       {filteredChats.map((chat) => (
         <Flex
-          key={chat.id}
-          className={chatId === chat.id ? "active" : undefined}
+          key={chat.chatId}
+          className={chatId === chat.chatId ? "active" : undefined}
           sx={(theme) => ({
             marginTop: 1,
             "&:hover, &.active": {
@@ -39,7 +76,7 @@ export function Chats({ search }: { search: string }) {
             },
           })}
         >
-          <Link to={`/chats/${chat.id}`} style={{ flex: 1 }}>
+          <Link to={`/chats/${chat.chatId}`} style={{ flex: 1 }}>
             <MainLink
               icon={<IconMessages size="1rem" />}
               color="teal"

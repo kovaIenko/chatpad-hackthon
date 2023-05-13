@@ -12,12 +12,56 @@ import {
 } from "@tanstack/react-location";
 import { ChatRoute } from "../routes/ChatRoute";
 import { IndexRoute } from "../routes/IndexRoute";
+import { Login } from "../routes/Login";
 import { Layout } from "./Layout";
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 const history = createHashHistory();
 const location = new ReactLocation({ history });
 
+export type Message = {
+  msg: string;
+  me?: boolean;
+  img: string | undefined;
+  _id: string;
+};
+
+type User = {
+  apiKey: string;
+  avatar: string;
+  createdAt: string;
+  queries: string;
+  uid: string;
+  updatedAt: string;
+  username: string;
+  _id: string;
+};
+
 export function App() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [chatLoading, setChatloading] = useState(true);
+  const [auth, setAuth] = useState<User | undefined>(() => {
+    const user = localStorage.getItem("auth");
+    if (!user) return undefined;
+    return JSON.parse(user);
+  });
+
+  function addMessage(msg: Message) {
+    setMessages((prev) => [...prev, msg]);
+  }
+  function toggleLoading(value: boolean) {
+    setLoading(value);
+  }
+  function handleAuth(value: any) {
+    setMessages([]);
+    setAuth(value);
+  }
+  function handlelogout() {
+    setAuth(undefined);
+    localStorage.removeItem("auth");
+  }
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
@@ -32,17 +76,17 @@ export function App() {
   useHotkeys([["mod+J", () => toggleColorScheme()]]);
 
   return (
-    <Router
-      location={location}
-      routes={[
-        { path: "/", element: <IndexRoute /> },
-        { path: "/chats/:chatId", element: <ChatRoute /> },
-      ]}
-    >
+    <Router location={location} routes={[
+    ]} >
       <ColorSchemeProvider
         colorScheme={colorScheme}
         toggleColorScheme={toggleColorScheme}
       >
+        <Routes>
+          <Route path="/login" element={!auth? <Login handleAuth={handleAuth}  /> : <Navigate to="/" />}> </Route>
+          <Route path="/" element={ !auth? <Navigate to="/login" /> : <IndexRoute/> }> </Route>
+          <Route path="/chats/:chatId" element={!auth? <Navigate to="/login" /> : <ChatRoute />}> </Route>
+        </Routes>
         <MantineProvider
           withGlobalStyles
           withNormalizeCSS
@@ -107,10 +151,10 @@ export function App() {
             },
           }}
         >
-          <Layout />
+          {!auth? <Navigate to="/login" /> : <Layout />}
           <Notifications />
         </MantineProvider>
       </ColorSchemeProvider>
-    </Router>
+      </Router>
   );
 }

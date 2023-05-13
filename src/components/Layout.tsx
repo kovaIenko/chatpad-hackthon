@@ -28,11 +28,11 @@ import {
   IconSunHigh,
   IconX,
 } from "@tabler/icons-react";
-import { Link, Outlet, useNavigate, useRouter } from "@tanstack/react-location";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
-import { db } from "../db";
+import { Chat, db } from "../db";
 import { useChatId } from "../hooks/useChatId";
 import { Chats } from "./Chats";
 import { CreatePromptModal } from "./CreatePromptModal";
@@ -41,6 +41,7 @@ import { LogoText } from "./Logo";
 import { Prompts } from "./Prompts";
 import { SettingsModal } from "./SettingsModal";
 import { config } from "../utils/config";
+import axios from "axios"; 
 
 declare global {
   interface Window {
@@ -54,22 +55,51 @@ export function Layout() {
   const [tab, setTab] = useState<"Chats" | "Prompts">("Chats");
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const navigate = useNavigate();
-  const router = useRouter();
+  const location = useLocation();
 
   const [search, setSearch] = useState("");
   const chatId = useChatId();
-  const chat = useLiveQuery(async () => {
-    if (!chatId) return null;
-    return db.chats.get(chatId);
-  }, [chatId]);
+  // const chat = useLiveQuery(async () => {
+  //   if (!chatId) return null;
+  //   return db.chats.get(chatId);
+  // }, [chatId]);
 
+
+  var auth = localStorage.getItem("accessToken");
+  const useLiveQueryVar = (chatId: any, authToken: any) => {
+    const [chat, setChat] = useState<Chat>();
+    useEffect(() => {
+      const fetchData = async () => {
+        if (!chatId || !authToken) return [];
+        try {
+          const response = await axios.get(`http://localhost:3001/api/chats/get?chatId=${chatId}`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+          console.log(response.data)
+          setChat(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+  
+      fetchData();
+    }, [chatId]);
+  
+    return chat;
+  };
+
+  const chat = useLiveQueryVar(chatId, auth);
+
+  console.log(chat)
   const border = `${rem(1)} solid ${
     theme.colorScheme === "dark" ? theme.colors.dark[4] : theme.colors.gray[2]
   }`;
 
   useEffect(() => {
     setOpened(false);
-  }, [router.state.location]);
+  }, [location]);
 
   return (
     <AppShell
@@ -126,7 +156,7 @@ export function Layout() {
               fullWidth
               value={tab}
               onChange={(value) => setTab(value as typeof tab)}
-              data={["Chats", "Prompts"]}
+              data={["Chats"]}
             />
             <Box sx={{ padding: 4 }}>
               {tab === "Chats" && (
@@ -135,13 +165,22 @@ export function Layout() {
                   leftIcon={<IconPlus size={20} />}
                   onClick={() => {
                     const id = nanoid();
-                    db.chats.add({
-                      id,
+                    console.log("let's create a chat")
+                    axios.post(`http://localhost:3001/api/chats/save`, 
+                    { chat: {
+                      chatId: id,
                       description: "New Chat",
                       totalTokens: 0,
                       createdAt: new Date(),
+                   } },
+                    {
+                      headers: {
+                        Authorization: `Bearer ${auth}`,
+                      },
                     });
-                    navigate({ to: `/chats/${id}` });
+
+                    console.log("here we are navigating")
+                    navigate(`/chats/${id}`);
                   }}
                 >
                   New Chat

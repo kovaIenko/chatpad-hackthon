@@ -33,7 +33,28 @@ interface WritingFormat {
     label: string;
 }
 
-export let config: Config;
+export let config = {
+    "defaultModel": {
+    "value": "",
+    "label": ""
+    },
+    "defaultType": "openai",
+    "defaultAuth": "none",
+    "defaultBase": "string",
+    "defaultVersion": "string",
+    "defaultKey": "string",
+    "availableModels": [],
+    "writingCharacters": [],
+    "writingTones": [""],
+    "writingStyles": [""],
+    "writingFormats": [],
+    "showDownloadLink": true,
+    "allowDarkModeToggle": true,
+    "allowSettingsModal": true,
+    "allowDatabaseModal": true,
+    "showTwitterLink": "true",
+    "showFeedbackLink": "true"
+};
 
 export const loadConfig = async () => {
     const response = await fetch("config.json");

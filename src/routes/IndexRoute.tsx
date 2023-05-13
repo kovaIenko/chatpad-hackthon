@@ -19,12 +19,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Logo } from "../components/Logo";
 import { SettingsModal } from "../components/SettingsModal";
 import { db } from "../db";
-import { config } from "../utils/config";
+//import { config } from "../utils/config";
+import { useEffect, useState } from "react";
 
 export function IndexRoute() {
   const settings = useLiveQuery(() => db.settings.get("general"));
   const { openAiApiKey } = settings ?? {};
-
   return (
     <>
       <Center py="xl" sx={{ height: "100%" }}>
@@ -57,7 +57,8 @@ export function IndexRoute() {
             ))}
           </SimpleGrid>
           <Group mt={50}>
-            {config.allowSettingsModal && (
+            {/* config.allowSettingsModal &&
+            { (
               <SettingsModal>
                 <Button
                   size="md"
@@ -67,8 +68,9 @@ export function IndexRoute() {
                   {openAiApiKey ? "Change OpenAI Key" : "Enter OpenAI Key"}
                 </Button>
               </SettingsModal>
-            )}
-            {config.showDownloadLink && !window.todesktop && (
+            )} */}
+            {/* {config.showDownloadLink &&}
+            { !window.todesktop && (
               <Button
                 component="a"
                 href="https://dl.todesktop.com/230313oyppkw40a"
@@ -79,7 +81,7 @@ export function IndexRoute() {
               >
                 Download Desktop App
               </Button>
-            )}
+            )} */}
           </Group>
         </Container>
       </Center>

@@ -12,59 +12,89 @@ import {
   Textarea,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { useLiveQuery } from "dexie-react-hooks";
 import { nanoid } from "nanoid";
-import { KeyboardEvent, useState, type ChangeEvent } from "react";
+import { KeyboardEvent, useEffect, useRef,  useState, type ChangeEvent } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 import { MessageItem } from "../components/MessageItem";
-import { db } from "../db";
+import { db, Message } from "../db";
 import { useChatId } from "../hooks/useChatId";
 import { config } from "../utils/config";
-import {
-  createChatCompletion,
-  createStreamChatCompletion,
-} from "../utils/openai";
+// import {
+//   createChatCompletion,
+//   createStreamChatCompletion,
+// } from "../utils/openai";
+
+import axios from "axios"; 
 
 export function ChatRoute() {
+
+  console.log("we are here:")
   const chatId = useChatId();
-  const apiKey = useLiveQuery(async () => {
-    return (await db.settings.where({ id: "general" }).first())?.openAiApiKey;
-  });
-  const messages = useLiveQuery(() => {
-    if (!chatId) return [];
-    return db.messages.where("chatId").equals(chatId).sortBy("createdAt");
-  }, [chatId]);
+
+  const auth = localStorage.getItem("accessToken");
+
+  const useLiveQueryVar = (chatId: any, authToken: any) => {
+    const [messages, setMessages] = useState<Message[]>([]);
+    console.log("try to get messages by chatId")
+    useEffect(() => {
+      const fetchData = async () => {
+        if (!chatId || !authToken) return [];
+        try {
+          const response = await axios.get(`http://localhost:3001/api/messages/get?chatId=${chatId}`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+          //console.log(response.data)
+          setMessages(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+  
+      fetchData();
+    }, [chatId]);
+  
+    return messages;
+  };
+
+
+  const messages = useLiveQueryVar(chatId, auth);
+
+  console.log(messages)
+  
   const userMessages =
     messages
       ?.filter((message) => message.role === "user")
       .map((message) => message.content) || [];
+
   const [userMsgIndex, setUserMsgIndex] = useState(0);
   const [content, setContent] = useState("");
   const [contentDraft, setContentDraft] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const chat = useLiveQuery(async () => {
-    if (!chatId) return null;
-    return db.chats.get(chatId);
-  }, [chatId]);
+  // const chat = useLiveQuery(async () => {
+  //   if (!chatId) return null;
+  //   return db.chats.get(chatId);
+  // }, [chatId]);
 
   const [writingCharacter, setWritingCharacter] = useState<string | null>(null);
   const [writingTone, setWritingTone] = useState<string | null>(null);
   const [writingStyle, setWritingStyle] = useState<string | null>(null);
   const [writingFormat, setWritingFormat] = useState<string | null>(null);
 
-  const getSystemMessage = () => {
-    const message: string[] = [];
-    if (writingCharacter) message.push(`You are ${writingCharacter}.`);
-    if (writingTone) message.push(`Respond in ${writingTone} tone.`);
-    if (writingStyle) message.push(`Respond in ${writingStyle} style.`);
-    if (writingFormat) message.push(writingFormat);
-    if (message.length === 0)
-      message.push(
-        "You are ChatGPT, a large language model trained by OpenAI."
-      );
-    return message.join(" ");
-  };
+  // const getSystemMessage = () => {
+  //   const message: string[] = [];
+  //   if (writingCharacter) message.push(`You are ${writingCharacter}.`);
+  //   if (writingTone) message.push(`Respond in ${writingTone} tone.`);
+  //   if (writingStyle) message.push(`Respond in ${writingStyle} style.`);
+  //   if (writingFormat) message.push(writingFormat);
+  //   if (message.length === 0)
+  //     message.push(
+  //       "You are ChatGPT, a large language model trained by OpenAI."
+  //     );
+  //   return message.join(" ");
+  // };
 
   const submit = async () => {
     if (submitting) return;
@@ -78,89 +108,123 @@ export function ChatRoute() {
       return;
     }
 
-    if (!apiKey) {
-      notifications.show({
-        title: "Error",
-        color: "red",
-        message: "OpenAI API Key is not defined. Please set your API Key",
-      });
-      return;
-    }
+    // if (!apiKey) {
+    //   notifications.show({
+    //     title: "Error",
+    //     color: "red",
+    //     message: "OpenAI API Key is not defined. Please set your API Key",
+    //   });
+    //   return;
+    // }
 
     try {
       setSubmitting(true);
 
-      await db.messages.add({
-        id: nanoid(),
-        chatId,
-        content,
-        role: "user",
-        createdAt: new Date(),
-      });
-      setContent("");
+      const user_message = {
+         messageId: nanoid(),
+         chatId: chatId, 
+         content: content,
+         role: "user",
+          createdAt: new Date(),
+      }
 
-      const messageId = nanoid();
-      await db.messages.add({
-        id: messageId,
-        chatId,
-        content: "█",
-        role: "assistant",
-        createdAt: new Date(),
+
+     console.log(user_message)
+      await axios.post(`http://localhost:3001/api/messages/save`, 
+      { message: user_message },
+      {
+        headers: {
+          Authorization: `Bearer ${auth}`,
+        },
       });
 
-      await createStreamChatCompletion(
-        apiKey,
-        [
-          {
-            role: "system",
-            content: getSystemMessage(),
-          },
-          ...(messages ?? []).map((message) => ({
-            role: message.role,
-            content: message.content,
-          })),
-          { role: "user", content },
-        ],
-        chatId,
-        messageId
-      );
+      // setContent("");
+
+      var history = (messages ?? []).map((message) => ({
+        role: message.role,
+        content: message.content,
+      }));
+
+      console.log(history)
+//    const answer = await axios.post(`http://localhost:3001/api/bot`, 
+//    history, 
+//  {
+//    headers: {
+//      Authorization: `Bearer ${auth}`,
+//    },
+//  });
+
+
+      // await createStreamChatCompletion(
+      //   apiKey,
+      //   [
+      //     {
+      //       role: "system",
+      //       content: getSystemMessage(),
+      //     },
+      //     ...,
+      //     { role: "user", content },
+      //   ],
+      //   chatId,
+      //   messageId
+      // );
+
+
+    //   const bot_message = {
+    //     messageId: nanoid(),
+    //     chatId: chatId, 
+    //     content: answer,
+    //     role: "assistant",
+    //      createdAt: new Date(),
+    //  }
+
+
+    //  console.log
+
+    //   await axios.post(`http://localhost:3001/api/messages/save`, 
+    //   {data: { message: bot_message }},
+    // {
+    //   headers: {
+    //     Authorization: `Bearer ${auth}`,
+    //   },
+    // });
 
       setSubmitting(false);
 
-      if (chat?.description === "New Chat") {
-        const messages = await db.messages
-          .where({ chatId })
-          .sortBy("createdAt");
-        const createChatDescription = await createChatCompletion(apiKey, [
-          {
-            role: "system",
-            content: getSystemMessage(),
-          },
-          ...(messages ?? []).map((message) => ({
-            role: message.role,
-            content: message.content,
-          })),
-          {
-            role: "user",
-            content:
-              "What would be a short and relevant title for this chat ? You must strictly answer with only the title, no other text is allowed.",
-          },
-        ]);
-        const chatDescription =
-          createChatDescription.data.choices[0].message?.content;
+    //   if (chat?.description === "New Chat") {
+    //     const messages = await db.messages
+    //       .where({ chatId })
+    //       .sortBy("createdAt");
+    //     const createChatDescription = await createChatCompletion(apiKey, [
+    //       {
+    //         role: "system",
+    //         content: getSystemMessage(),
+    //       },
+    //       ...(messages ?? []).map((message) => ({
+    //         role: message.role,
+    //         content: message.content,
+    //       })),
+    //       {
+    //         role: "user",
+    //         content:
+    //           "What would be a short and relevant title for this chat ? You must strictly answer with only the title, no other text is allowed.",
+    //       },
+    //     ]);
+    //     const chatDescription =
+    //       createChatDescription.data.choices[0].message?.content;
 
-        if (createChatDescription.data.usage) {
-          await db.chats.where({ id: chatId }).modify((chat) => {
-            chat.description = chatDescription ?? "New Chat";
-            if (chat.totalTokens) {
-              chat.totalTokens +=
-                createChatDescription.data.usage!.total_tokens;
-            } else {
-              chat.totalTokens = createChatDescription.data.usage!.total_tokens;
-            }
-          });
-        }
-      }
+    //     if (createChatDescription.data.usage) {
+    //       await db.chats.where({ id: chatId }).modify((chat) => {
+    //         chat.description = chatDescription ?? "New Chat";
+    //         if (chat.totalTokens) {
+    //           chat.totalTokens +=
+    //             createChatDescription.data.usage!.total_tokens;
+    //         } else {
+    //           chat.totalTokens = createChatDescription.data.usage!.total_tokens;
+    //         }
+    //       });
+    //     }
+    //   }
     } catch (error: any) {
       if (error.toJSON().message === "Network Error") {
         notifications.show({
@@ -180,6 +244,7 @@ export function ChatRoute() {
     } finally {
       setSubmitting(false);
     }
+
   };
 
   const onUserMsgToggle = (event: KeyboardEvent<HTMLTextAreaElement>) => {
