@@ -42,11 +42,12 @@ export function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [chatLoading, setChatloading] = useState(true);
-  const [auth, setAuth] = useState<User | undefined>(() => {
-    const user = localStorage.getItem("auth");
-    if (!user) return undefined;
-    return JSON.parse(user);
-  });
+  const [auth, setAuth] = useLocalStorage<string | undefined>(
+      {
+        key: "auth",
+        getInitialValueInEffect: false,
+      }
+  );
 
   function addMessage(msg: Message) {
     setMessages((prev) => [...prev, msg]);
@@ -60,7 +61,6 @@ export function App() {
   }
   function handlelogout() {
     setAuth(undefined);
-    localStorage.removeItem("auth");
   }
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
@@ -83,8 +83,8 @@ export function App() {
         toggleColorScheme={toggleColorScheme}
       >
         <Routes>
-          <Route path="/login" element={!auth? <Login handleAuth={handleAuth} /> : <Navigate to="/" />}> </Route>
           <Route path="/" element={ !auth? <Navigate to="/login" /> : <IndexRoute/> }> </Route>
+          <Route path="/login" element={!auth? <Login handleAuth={handleAuth} /> : <Navigate to="/" />}> </Route>
           <Route path="/chats/:chatId" element={!auth? <Navigate to="/login" /> : <ChatRoute />}> </Route>
         </Routes>
         <MantineProvider
