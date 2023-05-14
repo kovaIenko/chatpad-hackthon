@@ -7,6 +7,7 @@ export interface Chat {
   description: string;
   totalTokens: number;
   createdAt: Date;
+  isVisible: boolean
 }
 
 export interface Message {

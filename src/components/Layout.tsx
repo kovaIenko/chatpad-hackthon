@@ -32,14 +32,13 @@ import { Link, Outlet, useLocation, useParams, useNavigate } from "react-router-
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import { Chat } from "../db";
-import { Chats } from "./Chats";
-import { CreatePromptModal } from "./CreatePromptModal";
 import { DatabaseModal } from "./DatabaseModal";
 import { LogoText } from "./Logo";
 import { Prompts } from "./Prompts";
 import { SettingsModal } from "./SettingsModal";
 import { config } from "../utils/config";
 import axios from "axios"; 
+import { Chats } from "./Chats";
 
 declare global {
   interface Window {

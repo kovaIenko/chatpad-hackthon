@@ -10,9 +10,7 @@ import {
   ThemeIcon,
   Tooltip,
 } from "@mantine/core";
-import { useClipboard } from "@mantine/hooks";
 import { IconCopy, IconUser } from "@tabler/icons-react";
-import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Message } from "../db";
@@ -22,11 +20,6 @@ import { LogoIcon } from "./Logo";
 import { ScrollIntoView } from "./ScrollIntoView";
 
 export function MessageItem({ message }: { message: Message }) {
-  const clipboard = useClipboard({ timeout: 500 });
-  const wordCount = useMemo(() => {
-    var matches = message.content.match(/[\w\d\’\'-\(\)]+/gi);
-    return matches ? matches.length : 0;
-  }, [message.content]);
 
   return (
     <ScrollIntoView>
@@ -71,13 +64,6 @@ export function MessageItem({ message }: { message: Message }) {
                   ),
               }}
             />
-            {message.role === "assistant" && (
-              <Box>
-                <Text size="sm" color="dimmed">
-                  {wordCount} words
-                </Text>
-              </Box>
-            )}
           </Box>
           <Box>
             <CreatePromptModal content={message.content} />
